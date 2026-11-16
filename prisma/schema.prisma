@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ORDERS
+  CATALOG
+  VIEWER
+}
+
+enum ProductStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum OrderStatus {
+  PAID
+  NEEDS_REVIEW
+  CANCELLED
+  PARTIALLY_REFUNDED
+  REFUNDED
+}
+
+enum CheckoutStatus {
+  OPEN
+  EXPIRED
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  role            Role      @default(VIEWER)
+  mfaSecret       String? // chiffrer au repos avant la production (voir docs/SECURITY.md)
+  mfaEnabled      Boolean   @default(false)
+  mfaLastStep     Int?
+  failedLogins    Int       @default(0)
+  lockedUntil     DateTime?
+  createdAt       DateTime  @default(now())
+  sessions        Session[]
+  audits          AuditLog[]
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mfaPassed  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  @@index([userId])
+}
+
+model Category {
+  id       String    @id @default(cuid())
+  slug     String    @unique
+  name     String
+  products Product[]
+}
+
+model Product {
+  id                String        @id @default(cuid())
+  slug              String        @unique
+  name              String
+  description       String        @default("")
+  priceCents        Int
+  /// Coût d'achat connu (centimes). Unité (HT/TTC) à confirmer avec le fournisseur. null = inconnu.
+  supplierCostCents Int?
+  /// null = stock inconnu → non achetable
+  stock             Int?
+  status            ProductStatus @default(DRAFT)
+  supplier          String? // "BIGBUY" | "DEMO" | "MANUAL"
+  supplierSku       String?
+  supplierSyncedAt  DateTime?
+  isDemo            Boolean       @default(false)
+  images            String[]
+  categoryId        String?
+  category          Category?     @relation(fields: [categoryId], references: [id])
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  @@index([status])
+}
+
+model CheckoutSnapshot {
+  id              String         @id @default(cuid())
+  status          CheckoutStatus @default(OPEN)
+  linesJson       Json // lignes figées : prix lus en base au moment du paiement
+  shippingCents   Int
+  totalCents      Int
+  isDemo          Boolean        @default(false)
+  stripeSessionId String?        @unique
+  createdAt       DateTime       @default(now())
+}
+
+model Order {
+  id                    String      @id @default(cuid())
+  number                Int         @unique @default(autoincrement())
+  stripeSessionId       String      @unique
+  stripePaymentIntentId String?     @unique
+  status                OrderStatus
+  reviewReason          String?
+  grossCents            Int
+  shippingCents         Int
+  refundedCents         Int         @default(0)
+  feeCents              Int? // frais Stripe réels, null si non récupérés
+  customerEmail         String? // donnée personnelle : visible selon permission orders:pii
+  customerName          String?
+  shipCountry           String?
+  shipAddress           Json? // donnée personnelle
+  isDemo                Boolean     @default(false)
+  createdAt             DateTime    @default(now())
+  items                 OrderItem[]
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id                         String  @id @default(cuid())
+  orderId                    String
+  order                      Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId                  String?
+  nameSnapshot               String
+  unitPriceCents             Int
+  quantity                   Int
+  supplierCostCentsSnapshot  Int?
+}
+
+model WebhookEvent {
+  id          String   @id // identifiant d'événement Stripe : garantit l'idempotence
+  type        String
+  receivedAt  DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  actor     User?    @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  action    String
+  entityId  String?
+  meta      Json?
+  createdAt DateTime @default(now())
+  @@index([createdAt])
+}
+
+model SupplierSync {
+  id         String    @id @default(cuid())
+  provider   String
+  status     String // "OK" | "ERROR" | "SKIPPED"
+  message    String?
+  itemsCount Int       @default(0)
+  startedAt  DateTime  @default(now())
+  finishedAt DateTime?
+}
