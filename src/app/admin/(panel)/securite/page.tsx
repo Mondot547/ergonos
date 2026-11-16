@@ -39,7 +39,7 @@ export default async function Securite({ searchParams }: { searchParams: Promise
         <div className="card" style={{ maxWidth: 560 }}>
           <p>Ajoutez ce compte dans votre application d'authentification (saisie manuelle) :</p>
           <p><code>{user.mfaSecret}</code></p>
-          <p className="muted">URI : <code style={{ wordBreak: "break-all" }}>{otpauthUri(user.mfaSecret, user.email, "Boutique Bureau")}</code></p>
+          <p className="muted">URI : <code style={{ wordBreak: "break-all" }}>{otpauthUri(user.mfaSecret, user.email, "Ergonos")}</code></p>
           <form action={confirmMfa}>
             <label htmlFor="code">Code à 6 chiffres</label>
             <input id="code" name="code" inputMode="numeric" autoComplete="one-time-code" required />{" "}

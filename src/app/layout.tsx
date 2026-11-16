@@ -6,9 +6,9 @@ const site = process.env.SITE_URL ?? "http://localhost:3000";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site),
-  title: { default: "Boutique Bureau — accessoires pour bureau à domicile", template: "%s | Boutique Bureau" },
+  title: { default: "Ergonos — accessoires pour bureau à domicile", template: "%s | Ergonos" },
   description: "Accessoires ergonomiques et pratiques pour aménager votre bureau à domicile.",
-  openGraph: { type: "website", locale: "fr_FR", siteName: "Boutique Bureau" },
+  openGraph: { type: "website", locale: "fr_FR", siteName: "Ergonos" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -18,7 +18,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#contenu" className="visually-hidden">Aller au contenu</a>
         <header className="site">
           <div className="container">
-            <Link href="/" style={{ fontWeight: 700, textDecoration: "none" }}>Boutique Bureau</Link>
+            <Link href="/" style={{ fontWeight: 700, textDecoration: "none" }}>Ergonos</Link>
             <nav aria-label="Navigation principale">
               <Link href="/produits">Produits</Link>
               <Link href="/panier">Panier</Link>

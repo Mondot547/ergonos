@@ -1,4 +1,4 @@
-# Boutique Bureau — dropshipping, accessoires de bureau à domicile (France, EUR)
+# Ergonos — dropshipping, accessoires de bureau à domicile (France, EUR)
 
 Next.js (App Router) + TypeScript, PostgreSQL + Prisma, Stripe Checkout (mode test), admin sécurisé.
 
