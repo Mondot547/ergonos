@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { readCart, writeCart, clearCartCookie } from "@/lib/cart";
 import { priceCart, MAX_QTY_PER_LINE } from "@/lib/pricing";
 import { getStripe } from "@/lib/stripe/client";
+import { shippingCentsFromEnv } from "@/lib/shipping";
 
 export async function addToCart(formData: FormData) {
   const productId = String(formData.get("productId") ?? "");
@@ -27,11 +28,6 @@ export async function updateCart(formData: FormData) {
 
 export async function clearCart() {
   await clearCartCookie();
-}
-
-export function shippingCentsFromEnv(): number {
-  const n = Number(process.env.SHIPPING_FLAT_CENTS ?? "0");
-  return Number.isSafeInteger(n) && n >= 0 ? n : 0;
 }
 
 export async function startCheckout() {

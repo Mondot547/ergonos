@@ -3,7 +3,8 @@ import { prisma } from "@/lib/db";
 import { readCart } from "@/lib/cart";
 import { priceCart } from "@/lib/pricing";
 import { formatEur } from "@/lib/money";
-import { startCheckout, updateCart, shippingCentsFromEnv } from "@/app/actions/shop";
+import { startCheckout, updateCart } from "@/app/actions/shop";
+import { shippingCentsFromEnv } from "@/lib/shipping";
 import { isStripeTestMode } from "@/lib/stripe/client";
 
 export const dynamic = "force-dynamic";
