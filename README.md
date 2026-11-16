@@ -29,6 +29,18 @@ npm run dev
 Webhook en local : `stripe listen --forward-to localhost:3000/api/stripe/webhook`, puis copier le secret `whsec_…` dans `STRIPE_WEBHOOK_SECRET`.
 Connexion : `/admin/login`, puis activer la double authentification dans `/admin/securite`.
 
+## Base de données Supabase (test)
+
+Projet Supabase `ergonos` (région eu-west-3). Les migrations `0001_init` et `0002_enable_rls` ont **déjà été appliquées** via l'outil Supabase.
+Avant le premier `prisma migrate deploy` contre cette base, les déclarer comme appliquées pour éviter de les rejouer :
+
+```bash
+npx prisma migrate resolve --applied 0001_init
+npx prisma migrate resolve --applied 0002_enable_rls
+```
+
+Utiliser l'URL du *pooler* Supabase pour `DATABASE_URL` (secrets d'hébergeur et GitHub uniquement). La RLS est activée sans politique : l'API publique Supabase n'a accès à rien, seul Prisma (rôle propriétaire) lit et écrit.
+
 ## Structure
 
 - `src/lib/` : logique testable (`pricing`, `kpi`, `auth/*`, `stripe/webhook-handler`, `bigbuy/client`).
